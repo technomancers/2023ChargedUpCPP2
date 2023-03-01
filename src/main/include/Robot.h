@@ -46,4 +46,7 @@ class Robot : public frc::TimedRobot {
 
   frc::SendableChooser<char> driveModeChooser;
   char driveModeSelected;
+
+
+  bool auto_basicLevel_prog[2] = {false};
 };

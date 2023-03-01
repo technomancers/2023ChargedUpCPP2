@@ -63,9 +63,21 @@ void Robot::AutonomousInit() {
   }
 }
 
+
+/**
+ * auton codes are executed as a set of tasks.
+ * Each code has a corrosponding bool[] containing its progress.
+ * The command called in each task returns whether or not it has bee completed.
+ * The array is then updated so the next run proceeds to the next task
+*/
 void Robot::AutonomousPeriodic() {
   if (autonCodeSelected == auto_basicLevel) {
-    drivetrain.level(-gyro.GetXComplementaryAngle().value());
+
+    if (!auto_basicLevel_prog[0]) auto_basicLevel_prog[0] = 
+    drivetrain.gotoRamp(gyro.GetXComplementaryAngle().value());
+
+    else if (!auto_basicLevel_prog[1])  auto_basicLevel_prog[1] = 
+    drivetrain.level(gyro.GetXComplementaryAngle().value());
   } else {
     // Default Auto goes here
   }

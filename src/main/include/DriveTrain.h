@@ -82,22 +82,51 @@ class DriveTrain {
         diffDrives[0].Feed();
         diffDrives[1].Feed();
     }
-    void level(double angle) {
+    int leveltime = 0;
+
+    /**
+     * function to automatically level the charge station
+     * @param angle the pich of the robot in degrees
+     * @return true if level, false otherwise
+    */
+    bool level(double angle) {
         
-        if (angle < 5 and angle > -5) SmtD::PutString("direction", "flat");
-        
-        else if (angle > 5) {
-            SmtD::PutString("direction", "hopper up");
+        if (angle < 8 and angle > -8) {
+            SmtD::PutString("direction", "flat");
+            diffDrives[0].TankDrive(0,0);
+            leveltime++;
+        }
+        else if (angle >= 8) {
+            SmtD::PutString("direction", "arm up");
+            diffDrives[0].TankDrive(.65,.65);
         }
         else {
-            SmtD::PutString("direction", "arm up");
+            SmtD::PutString("direction", "hopper up");
+            diffDrives[0].TankDrive(-.65,-.65);
         }
 
-        diffDrives[0].Feed();
         diffDrives[1].Feed();
 
         frc::SmartDashboard::PutNumber("Angle", angle);
 
-
+        if (leveltime >= 100) return true;
+        else return false;
     };
+    /**
+     * function to drive to the chrage station
+     * @param angle the pitch of the robot in degrees
+     * @return true if the charge station has been reached, false otherwise
+    */
+    bool gotoRamp(double angle) {
+        if (angle > 8 or angle < -8) {
+            diffDrives[0].Feed();
+            diffDrives[1].Feed();
+            return true;
+        }
+        else {
+            diffDrives[0].TankDrive(-.65,-.65);
+            diffDrives[1].Feed();
+            return false;
+        }
+    }
 };

@@ -13,6 +13,6 @@ namespace MCBindings {
     const int rightDriveF = 3;
     const int rightDriveB = 4;
 
-    const int liftL = 7;
-    const int liftR = 8;
+    const int liftL = 8;
+    const int liftR = 9;
 }
