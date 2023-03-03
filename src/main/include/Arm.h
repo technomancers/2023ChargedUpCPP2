@@ -1,11 +1,18 @@
-#include "ctre/Phoenix.h"
+#include "ctre/phoenix/motorcontrol/can/WPI_TalonFX.h"
 
 #include <frc/Xboxcontroller.h>
 #include <frc/motorcontrol/MotorControllerGroup.h>
+#include <frc/Solenoid.h>
+
+#include "Constants&Defaults.h"
+
+using ctre::phoenix::motorcontrol::can::WPI_TalonFX;
 
 class Arm {
 
     private:
+
+    bool claw_isShut = false;
 
     public:
 
@@ -15,21 +22,54 @@ class Arm {
     }
 
     WPI_TalonFX lift[2] = {
-        WPI_TalonFX{MCBindings::liftL},
-        WPI_TalonFX{MCBindings::liftR},
+        WPI_TalonFX{CANBindings::liftL},
+        WPI_TalonFX{CANBindings::liftR},
+    };
+    frc::Solenoid solenoids[2] = {
+        frc::Solenoid(CANBindings::PnumMod, frc::PneumaticsModuleType::CTREPCM, SolenoidBindings::clawCyl1),
+        frc::Solenoid(CANBindings::PnumMod, frc::PneumaticsModuleType::CTREPCM, SolenoidBindings::clawCyl2)
     };
 
     frc::MotorControllerGroup liftMs = frc::MotorControllerGroup{lift[0], lift[1]};
 
     frc::XboxController ctrl = frc::XboxController(USBBindings::armCtrl);
 
-    void move(int pos) {
-
-        //manual control
-        if (ctrl.GetRightTriggerAxis() > .5) liftMs.Set(ctrl.GetRightY());
-
-        else {}
-        
-
+    frc2::PIDController pid{
+        PIDCoefDefaults::arm::P,
+        PIDCoefDefaults::arm::I,
+        PIDCoefDefaults::arm::D
     };
+
+    void move() {
+        //manual control
+        if (ctrl.GetRightTriggerAxis() > .5) {
+            pid.SetSetpoint(lift[0].GetSelectedSensorPosition());
+
+            liftMs.Set(ctrl.GetLeftY());
+
+            if (ctrl.GetLeftBumperPressed()) setClaw(!claw_isShut);
+
+        }
+
+        else liftMs.Set(pid.Calculate(lift[0].GetSelectedSensorPosition()));
+    }
+    int setClaw_delay = 10;
+    /**
+     * opens/closes the claw
+     * @param isShut bool; true is shut, false is open (duh)
+     * @return 1 if delay is over, 0 otherwise */
+    int setClaw(bool isShut) {
+
+        if (claw_isShut != isShut) {
+            claw_isShut = isShut;
+            solenoids[0].Set(isShut);
+            solenoids[1].Set(isShut);
+            setClaw_delay = 10;
+        }
+        else {
+            setClaw_delay--;
+            if (setClaw_delay = 0) return 1;
+        }
+        return 0;
+    }
 };

@@ -39,14 +39,14 @@ class Robot : public frc::TimedRobot {
   frc::ADIS16470_IMU gyro = frc::ADIS16470_IMU{};
 
  private:
-  frc::SendableChooser<std::string> autonCodeChooser;
-  const std::string auto_basicLevel = "Basic Level";
-  const std::string kAutoNameCustom = "My Auto";
-  std::string autonCodeSelected;
+  frc::SendableChooser<int> autonCodeChooser;
+  const int auto_basicLevel = 0;
+  const int kAutoNameCustom = 1;
+  int autonCodeSelected;
 
   frc::SendableChooser<char> driveModeChooser;
   char driveModeSelected;
 
 
-  bool auto_basicLevel_prog[2] = {false};
+  int auto_basicLevel_prog = 1;
 };

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <string>
 #include <map>
 #include <bits/stdc++.h>
 
@@ -9,16 +8,20 @@
 #include <frc/motorcontrol/MotorControllerGroup.h>
 #include <frc/drive/DifferentialDrive.h>
 
-#include "ctre/Phoenix.h"
+#include <frc/controller/PIDController.h>
 
-#include "Constants.h"
+#include "ctre/phoenix/motorcontrol/can/WPI_TalonFX.h"
+
+#include "Constants&Defaults.h"
+
+using ctre::phoenix::motorcontrol::can::WPI_TalonFX;
 
 class DriveTrain {
 
     public:
 
     DriveTrain() {
-        front[1 ] = "hopper";
+        front[ 1] = "hopper";
         front[-1] = "arm";
 
         // invert drive on right since motors face opposite dirrections
@@ -28,14 +31,14 @@ class DriveTrain {
 
     // left motors when hopper is front
     WPI_TalonFX left [2] = {
-        WPI_TalonFX{MCBindings::leftDriveF},
-        WPI_TalonFX{MCBindings::leftDriveB}};
+        WPI_TalonFX{CANBindings::leftDriveF},
+        WPI_TalonFX{CANBindings::leftDriveB}};
     frc::MotorControllerGroup leftMs = frc::MotorControllerGroup{left[0], left[1]};
     // right motors when hopper is front
 
     WPI_TalonFX right[2] = {
-        WPI_TalonFX{MCBindings::rightDriveF},
-        WPI_TalonFX{MCBindings::rightDriveB}};
+        WPI_TalonFX{CANBindings::rightDriveF},
+        WPI_TalonFX{CANBindings::rightDriveB}};
     frc::MotorControllerGroup rightMs = frc::MotorControllerGroup{right[0], right[1]};
 
     // frc::DifferentialDrives for forward and reverse
@@ -87,9 +90,9 @@ class DriveTrain {
     /**
      * function to automatically level the charge station
      * @param angle the pich of the robot in degrees
-     * @return true if level, false otherwise
+     * @return 1 if level, 0 otherwise
     */
-    bool level(double angle) {
+    int level(double angle) {
         
         if (angle < 8 and angle > -8) {
             SmtD::PutString("direction", "flat");
@@ -104,29 +107,28 @@ class DriveTrain {
             SmtD::PutString("direction", "hopper up");
             diffDrives[0].TankDrive(-.65,-.65);
         }
-
         diffDrives[1].Feed();
 
         frc::SmartDashboard::PutNumber("Angle", angle);
 
-        if (leveltime >= 100) return true;
-        else return false;
+        if (leveltime >= 100) return 1;
+        else return 0;
     };
     /**
      * function to drive to the chrage station
      * @param angle the pitch of the robot in degrees
-     * @return true if the charge station has been reached, false otherwise
+     * @return 1 if the charge station has been reached, 0 otherwise
     */
-    bool gotoRamp(double angle) {
+    int gotoRamp(double angle) {
         if (angle > 8 or angle < -8) {
             diffDrives[0].Feed();
             diffDrives[1].Feed();
-            return true;
+            return 1;
         }
         else {
             diffDrives[0].TankDrive(-.65,-.65);
             diffDrives[1].Feed();
-            return false;
+            return 0;
         }
     }
 };

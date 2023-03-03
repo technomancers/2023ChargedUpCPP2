@@ -13,7 +13,7 @@
 void Robot::RobotInit() {
   // select auton code
   autonCodeChooser.SetDefaultOption("Basic Level", auto_basicLevel);
-  autonCodeChooser.AddOption(kAutoNameCustom, kAutoNameCustom);
+  autonCodeChooser.AddOption("n/a", kAutoNameCustom);
   frc::SmartDashboard::PutData("Auto Modes: ", &autonCodeChooser);
 
   driveModeChooser.SetDefaultOption("Arcade Drive", 'a');
@@ -71,15 +71,18 @@ void Robot::AutonomousInit() {
  * The array is then updated so the next run proceeds to the next task
 */
 void Robot::AutonomousPeriodic() {
-  if (autonCodeSelected == auto_basicLevel) {
+  switch (autonCodeSelected) {
+    case 0:// goto and level charge station
 
-    if (!auto_basicLevel_prog[0]) auto_basicLevel_prog[0] = 
-    drivetrain.gotoRamp(gyro.GetXComplementaryAngle().value());
+      switch (auto_basicLevel_prog) {
+        case 1:
+          auto_basicLevel_prog +=
+          drivetrain.gotoRamp(gyro.GetXComplementaryAngle().value());
 
-    else if (!auto_basicLevel_prog[1])  auto_basicLevel_prog[1] = 
-    drivetrain.level(gyro.GetXComplementaryAngle().value());
-  } else {
-    // Default Auto goes here
+        case 2:
+          auto_basicLevel_prog +=
+          drivetrain.level(gyro.GetXComplementaryAngle().value());
+      }
   }
 }
 
