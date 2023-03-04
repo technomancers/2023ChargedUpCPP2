@@ -1,3 +1,7 @@
+//prevent from being included twice
+#ifndef NoInclude_Constants_Defaults
+#define NoInclude_Constants_Defaults
+
 #define SmtD frc::SmartDashboard
 
 
@@ -20,17 +24,41 @@ namespace CANBindings {
 }
 
 namespace SolenoidBindings {
-    const int clawCyl1 = 0;
-    const int clawCyl2 = 2;
+    const int clawSol1 = 0;
+    const int clawSol2 = 2;
 }
 
-namespace PIDCoefDefaults {
+namespace PIDDefaults {
 
     namespace drive {
-        double P,I,D;
+        double P = 0;
+        double I = 0;
+        double D = 0;
     }
 
     namespace arm {
-        double P,I,D;
+        double P = 0;
+        double I = 0;
+        double D = 0;
     }
 }
+
+namespace armLocations {
+
+    namespace cone {
+        int bottom = 0;
+        int middle = 0;
+        int top    = 0;
+    }
+
+    namespace cube {
+        int bottom = 0;
+        int middle = 0;
+        int top    = 0;
+    }
+
+    int home = 0;
+
+    int pickup = 0;
+}
+#endif

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ctre/phoenix/motorcontrol/can/WPI_TalonFX.h"
 
 #include <frc/Xboxcontroller.h>
@@ -14,11 +16,30 @@ class Arm {
 
     bool claw_isShut = false;
 
+    int armPosOffset = 0;
+
     public:
 
     Arm() {
         lift[0].SetInverted(true);
         lift[1].SetInverted(false);
+
+        SmtD::PutNumber("arm setpoint", pid.GetSetpoint());
+
+        SmtD::PutNumber("arm P", 0);
+        SmtD::PutNumber("arm I", 0);
+        SmtD::PutNumber("arm D", 0);
+
+        SmtD::PutNumber("cone bottom", armLocations::cone::bottom);
+        SmtD::PutNumber("cone middle", armLocations::cone::middle);
+        SmtD::PutNumber("cone top"   , armLocations::cone::top   );
+
+        SmtD::PutNumber("cube bottom", armLocations::cube::bottom);
+        SmtD::PutNumber("cube middle", armLocations::cube::middle);
+        SmtD::PutNumber("cube top"   , armLocations::cube::top   );
+
+        SmtD::PutNumber("home pos"  , armLocations::home  );
+        SmtD::PutNumber("pickup pos", armLocations::pickup);
     }
 
     WPI_TalonFX lift[2] = {
@@ -26,8 +47,8 @@ class Arm {
         WPI_TalonFX{CANBindings::liftR},
     };
     frc::Solenoid solenoids[2] = {
-        frc::Solenoid(CANBindings::PnumMod, frc::PneumaticsModuleType::CTREPCM, SolenoidBindings::clawCyl1),
-        frc::Solenoid(CANBindings::PnumMod, frc::PneumaticsModuleType::CTREPCM, SolenoidBindings::clawCyl2)
+        frc::Solenoid(CANBindings::PnumMod, frc::PneumaticsModuleType::CTREPCM, SolenoidBindings::clawSol1),
+        frc::Solenoid(CANBindings::PnumMod, frc::PneumaticsModuleType::CTREPCM, SolenoidBindings::clawSol2)
     };
 
     frc::MotorControllerGroup liftMs = frc::MotorControllerGroup{lift[0], lift[1]};
@@ -35,9 +56,15 @@ class Arm {
     frc::XboxController ctrl = frc::XboxController(USBBindings::armCtrl);
 
     frc2::PIDController pid{
-        PIDCoefDefaults::arm::P,
-        PIDCoefDefaults::arm::I,
-        PIDCoefDefaults::arm::D
+        PIDDefaults::arm::P,
+        PIDDefaults::arm::I,
+        PIDDefaults::arm::D
+    };
+    inline int getMotorPos() {
+        return lift[0].GetSelectedSensorPosition() + armPosOffset;
+    }
+    inline void setArmOffset() {
+        armPosOffset = lift[0].GetSelectedSensorPosition();
     };
 
     void move() {
@@ -68,8 +95,30 @@ class Arm {
         }
         else {
             setClaw_delay--;
-            if (setClaw_delay = 0) return 1;
+            if (setClaw_delay == 0) return 1;
         }
         return 0;
     }
+    int setSetPoint(bool isIncrement, int pos) {
+        pid.SetSetpoint( isIncrement? getMotorPos() + pos : pos);
+        return 1;
+    }
+    int timeSinceArival = 0;
+    /**
+     * function to go a predetermined location
+     * @return 1 if destination has been reached, 0 otherwise
+    */
+    int gotoSetPoint() {
+        liftMs.Set(pid.Calculate(getMotorPos()));
+
+        if (pid.AtSetpoint()) {
+            timeSinceArival++;
+            if (timeSinceArival > 8) {
+                timeSinceArival = 0;
+                return 1;
+            }
+        }
+        else timeSinceArival = 0;
+        return 0;
+   };
 };

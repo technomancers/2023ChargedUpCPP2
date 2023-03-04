@@ -27,6 +27,12 @@ class DriveTrain {
         // invert drive on right since motors face opposite dirrections
         rightMs.SetInverted(true);
         leftMs.SetInverted(false);
+
+        SmtD::PutNumber("drive setpoint", pid.GetSetpoint());
+
+        SmtD::PutNumber("drive P", 0);
+        SmtD::PutNumber("drive I", 0);
+        SmtD::PutNumber("drive D", 0);
     }
 
     // left motors when hopper is front
@@ -51,6 +57,13 @@ class DriveTrain {
 
     int dir = 1;
 
+    frc2::PIDController pid {
+        PIDDefaults::drive::P,
+        PIDDefaults::drive::I,
+        PIDDefaults::drive::D};
+
+
+
     /**
      * map <1 : "hopper">, <-1 : "arm">
      * tells which end is the front
@@ -61,6 +74,14 @@ class DriveTrain {
 
 
     double rightCompensation = .93;
+
+    /**
+     * function to get the output of the PID loop
+     * @return the output of the PID loop based on the right front motor position
+    */
+    inline double getPIDOutput() {
+        return pid.Calculate(right[0].GetSelectedSensorVelocity());
+    }
 
     /**
      * makes the robot drive
@@ -85,6 +106,15 @@ class DriveTrain {
         diffDrives[0].Feed();
         diffDrives[1].Feed();
     }
+
+    /**
+     * functions below are used in Robot::AutonomousPeriodic().
+     * they return 1 if their task is completed so that the nex
+     * run will use the next task. otherwise, they return 0 and
+     * are reexectued next cycle
+    */
+
+
     int leveltime = 0;
 
     /**
@@ -101,11 +131,11 @@ class DriveTrain {
         }
         else if (angle >= 8) {
             SmtD::PutString("direction", "arm up");
-            diffDrives[0].TankDrive(.65,.65);
+            diffDrives[0].TankDrive(.65,.65 * rightCompensation);
         }
         else {
             SmtD::PutString("direction", "hopper up");
-            diffDrives[0].TankDrive(-.65,-.65);
+            diffDrives[0].TankDrive(-.65,-.65 * rightCompensation);
         }
         diffDrives[1].Feed();
 
@@ -117,18 +147,50 @@ class DriveTrain {
     /**
      * function to drive to the chrage station
      * @param angle the pitch of the robot in degrees
+     * @param dir 1 for forward, -1 for backward
      * @return 1 if the charge station has been reached, 0 otherwise
     */
-    int gotoRamp(double angle) {
+    int gotoRamp(double angle, int dir) {
         if (angle > 8 or angle < -8) {
             diffDrives[0].Feed();
             diffDrives[1].Feed();
             return 1;
         }
         else {
-            diffDrives[0].TankDrive(-.65,-.65);
+            diffDrives[0].TankDrive(-.65 * dir,-.65 * dir * rightCompensation);
             diffDrives[1].Feed();
             return 0;
         }
     }
+    /**
+     * function to set setpoint of pid loop.
+     * exists only to make auton codes work correctly
+     * @param isIncrement whenther or not to add the current position to pos
+     * @param pos where/how far to go
+     * @return 1
+    */
+    int setSetPoint(bool isIncrement, int pos) {
+        pid.SetSetpoint( isIncrement? right[0].GetSelectedSensorPosition() + pos : pos);
+        return 1;
+    }
+
+    int timeSinceArival = 0;
+    /**
+     * function to drive a predetermined location
+     * @return 1 if destination has been reached, 0 otherwise
+    */
+    int gotoSetPoint() {
+        diffDrives[0].TankDrive(getPIDOutput(),getPIDOutput() * rightCompensation);
+        diffDrives[1].Feed();
+
+        if (pid.AtSetpoint()) {
+            timeSinceArival++;
+            if (timeSinceArival > 8) {
+                timeSinceArival = 0;
+                return 1;
+            }
+        }
+        else timeSinceArival = 0;
+        return 0;
+   };
 };
