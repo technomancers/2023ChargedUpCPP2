@@ -21,7 +21,7 @@ class Arm {
     public:
 
     Arm() {
-        lift[0].SetInverted(true);
+        lift[0].SetInverted(true );
         lift[1].SetInverted(false);
 
         SmtD::PutNumber("arm setpoint", pid.GetSetpoint());
@@ -60,9 +60,13 @@ class Arm {
         PIDDefaults::arm::I,
         PIDDefaults::arm::D
     };
+    /**
+     * @return the position of the arm minus the offset
+    */
     inline int getMotorPos() {
-        return lift[0].GetSelectedSensorPosition() + armPosOffset;
+        return lift[0].GetSelectedSensorPosition() - armPosOffset;
     }
+    /*callibrates the arm based on the current location*/
     inline void setArmOffset() {
         armPosOffset = lift[0].GetSelectedSensorPosition();
     };

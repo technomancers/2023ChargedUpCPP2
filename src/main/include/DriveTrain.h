@@ -150,14 +150,14 @@ class DriveTrain {
      * @param dir 1 for forward, -1 for backward
      * @return 1 if the charge station has been reached, 0 otherwise
     */
-    int gotoRamp(double angle, int dir) {
+    int gotoRamp(double angle, int _dir) {
         if (angle > 8 or angle < -8) {
             diffDrives[0].Feed();
             diffDrives[1].Feed();
             return 1;
         }
         else {
-            diffDrives[0].TankDrive(-.65 * dir,-.65 * dir * rightCompensation);
+            diffDrives[0].TankDrive(-.65 * _dir,-.65 * _dir * rightCompensation);
             diffDrives[1].Feed();
             return 0;
         }

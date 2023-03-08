@@ -40,8 +40,13 @@ class Robot : public frc::TimedRobot {
 
  private:
   frc::SendableChooser<int> autonCodeChooser;
-  const int auto_basicLevel = 0;
-  const int auto_testPID = 1;
+  const int auto_basicLevel      = 0;
+  const int auto_testPID         = 1;
+  const int auto_moveOut         = 2;
+  const int auto_scoreAndLeave   = 3;
+  const int auto_scoreAndLevel   = 4;
+  const int auto_scoreLevelLeave = 5;
+  const int auto_justScore       = 6;
   int autonCodeSelected;
 
   frc::SendableChooser<char> driveModeChooser;
@@ -50,4 +55,9 @@ class Robot : public frc::TimedRobot {
 
   int auto_basicLevel_prog = 1;
   int auto_testPID_prog = 1;
+  int auto_moveOut_prog = 1;
+  int auto_scoreAndLeave_prog = 1;
+  int auto_scoreAndLevel_prog = 1;
+  int auto_scoreLevelLeave_prog = 1;
+  int auto_justScore_prog = 1;
 };
