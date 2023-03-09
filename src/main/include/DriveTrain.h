@@ -75,12 +75,14 @@ class DriveTrain {
 
     double rightCompensation = .93;
 
+    int offset = 0;
+
     /**
      * function to get the output of the PID loop
      * @return the output of the PID loop based on the right front motor position
     */
     inline double getPIDOutput() {
-        return pid.Calculate(right[0].GetSelectedSensorVelocity());
+        return pid.Calculate(right[0].GetSelectedSensorPosition());
     }
 
     /**
@@ -171,6 +173,10 @@ class DriveTrain {
     */
     int setSetPoint(bool isIncrement, int pos) {
         pid.SetSetpoint( isIncrement? right[0].GetSelectedSensorPosition() + pos : pos);
+        return 1;
+    }
+    int setOffset() {
+        offset = right[0].GetSelectedSensorPosition();
         return 1;
     }
 

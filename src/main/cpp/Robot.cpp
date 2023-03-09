@@ -70,6 +70,9 @@ void Robot::AutonomousInit() {
   armLocations::home   = SmtD::GetNumber("home pos"  , 0);
   armLocations::pickup = SmtD::GetNumber("pickup pos", 0);
 
+  drivetrain.setOffset();
+  arm.setArmOffset();
+
   if (autonCodeSelected == auto_testPID) {
     // Custom Auto goes here
   } else {
