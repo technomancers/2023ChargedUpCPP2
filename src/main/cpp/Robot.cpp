@@ -205,11 +205,15 @@ void Robot::AutonomousPeriodic() {
           case 6:
             autoProg += drivetrain.level(gyro.GetXComplementaryAngle().value());
             break;
+            /*
           case 7:
             autoProg += drivetrain.setSetPoint(true, 0); // needs to be defined
             break;
           case 8:
             autoProg += drivetrain.gotoSetPoint();
+            break;*/
+          case 7:
+            autoProg += drivetrain.unlevel(gyro.GetXComplementaryAngle().value());
             break;
         } break;
         case 6:
@@ -254,7 +258,9 @@ void Robot::TeleopPeriodic() {
     frc::SmartDashboard::PutString("Front : ", drivetrain.front[drivetrain.dir]);
   }
   // drive
-  	drivetrain.drive(*speed, driveModeSelected);
+    if (drivetrain.ctrl.GetLeftTriggerAxis() < .5)
+  	  drivetrain.drive(*speed, driveModeSelected);
+    else drivetrain.level(gyro.GetXComplementaryAngle().value());
 
   	if (arm.ctrl.GetLeftTriggerAxis() < .5) {
 		  if 		(arm.ctrl.GetAButtonPressed()) arm.setSetPoint(false, armLocations::cone::bottom);

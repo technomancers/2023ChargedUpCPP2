@@ -148,6 +148,19 @@ class DriveTrain {
         if (leveltime >= 100) return 1;
         else return 0;
     };
+    bool isUp = true;
+    int unlevel(double angle) {
+        isUp = true;
+
+        if      (-8 < angle < 8 && isUp)  diffDrives[0].TankDrive(.5, .5 * rightCompensation);
+        else if (-8 < angle < 8 && !isUp) return 1;
+
+        else {
+            diffDrives[0].TankDrive(.8, .8 * rightCompensation);
+            isUp = false;
+        }
+        return 0;
+    }
     /**
      * function to drive to the chrage station
      * @param angle the pitch of the robot in degrees
