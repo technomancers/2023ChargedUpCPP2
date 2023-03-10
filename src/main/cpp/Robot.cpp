@@ -133,7 +133,7 @@ void Robot::AutonomousPeriodic() {
           break;
           
       } break;
-      case 3:
+      case 2:
         switch (autoProg) {
           case 1:
             autoProg += drivetrain.setSetPoint(false, 0); // needs to be defined
@@ -142,7 +142,7 @@ void Robot::AutonomousPeriodic() {
             autoProg += drivetrain.gotoSetPoint();
             break;
         } break;
-      case 4:
+      case 3:
         switch (autoProg) {
           case 1:
             autoProg += arm.setSetPoint(false, armLocations::cone::middle);
@@ -163,7 +163,7 @@ void Robot::AutonomousPeriodic() {
             autoProg += drivetrain.gotoSetPoint();
             break;
         } break;
-      case 5:
+      case 4:
         switch (autoProg) {
           case 1:
             autoProg += arm.setSetPoint(false, armLocations::cone::middle);
@@ -184,8 +184,8 @@ void Robot::AutonomousPeriodic() {
             autoProg += drivetrain.level(gyro.GetXComplementaryAngle().value());
             break;
         } break;
-        case 6:
-        
+        case 5:
+
         switch (autoProg) {
           case 1:
             autoProg += arm.setSetPoint(false, armLocations::cone::middle);
@@ -211,8 +211,24 @@ void Robot::AutonomousPeriodic() {
           case 8:
             autoProg += drivetrain.gotoSetPoint();
             break;
-        };
-  }
+        } break;
+        case 6:
+          switch (autoProg) {
+          case 1:
+            autoProg += arm.setSetPoint(false, armLocations::cone::middle);
+            break;
+          case 2:
+            autoProg += arm.gotoSetPoint(true, false);
+            break;
+          case 3:
+            autoProg += arm.setSetPoint(false, armLocations::home);
+            break;
+          case 4:
+            autoProg += arm.gotoSetPoint();
+            break;
+
+          }
+      }
 }
 
 void Robot::TeleopInit() {
