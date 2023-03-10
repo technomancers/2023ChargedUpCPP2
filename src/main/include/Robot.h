@@ -53,11 +53,7 @@ class Robot : public frc::TimedRobot {
   char driveModeSelected;
 
 
-  int auto_basicLevel_prog = 1;
-  int auto_testPID_prog = 1;
-  int auto_moveOut_prog = 1;
-  int auto_scoreAndLeave_prog = 1;
-  int auto_scoreAndLevel_prog = 1;
-  int auto_scoreLevelLeave_prog = 1;
-  int auto_justScore_prog = 1;
+  int autoProg = 1;
+
+int clawReady = 0;
 };

@@ -73,6 +73,10 @@ void Robot::AutonomousInit() {
   drivetrain.setOffset();
   arm.setArmOffset();
 
+  arm.setClaw(true);
+
+  autoProg = 1;
+
   if (autonCodeSelected == auto_testPID) {
     // Custom Auto goes here
   } else {
@@ -89,23 +93,25 @@ void Robot::AutonomousInit() {
  * and the next task will be executed next runthru
  */
 void Robot::AutonomousPeriodic() {
+  if (++clawReady < 10) return;
+
   switch (autonCodeSelected) {
     case 0:// goto and level charge station
 
-      switch (auto_basicLevel_prog) {
+      switch (autoProg) {
         case 1:
-          auto_basicLevel_prog +=
+          autoProg +=
           drivetrain.gotoRamp(gyro.GetXComplementaryAngle().value(), 1);
           break;
 
         case 2:
-          auto_basicLevel_prog +=
+          autoProg +=
           drivetrain.level(gyro.GetXComplementaryAngle().value());
           break;
       } break;
     case 1:// test/configure PID
 
-      switch (auto_testPID_prog) {
+      switch (autoProg) {
         case 1:
           drivetrain.setSetPoint(false, SmtD::GetNumber("drive setpoint", 0));
           drivetrain.pid.SetPID(
@@ -128,56 +134,84 @@ void Robot::AutonomousPeriodic() {
           
       } break;
       case 3:
-        switch (auto_moveOut_prog) {
+        switch (autoProg) {
           case 1:
-            auto_moveOut_prog += drivetrain.setSetPoint(false, 0); // needs to be defined
+            autoProg += drivetrain.setSetPoint(false, 0); // needs to be defined
             break;
           case 2:
-            auto_moveOut_prog += drivetrain.gotoSetPoint();
+            autoProg += drivetrain.gotoSetPoint();
             break;
         } break;
       case 4:
-        switch (auto_scoreAndLeave_prog) {
+        switch (autoProg) {
           case 1:
-            auto_scoreAndLeave_prog += arm.setSetPoint(false, armLocations::cube::middle);
+            autoProg += arm.setSetPoint(false, armLocations::cone::middle);
             break;
           case 2:
-            auto_scoreAndLeave_prog += arm.gotoSetPoint();
+            autoProg += arm.gotoSetPoint(true, false);
             break;
           case 3:
-            auto_scoreAndLeave_prog += arm.setSetPoint(false, armLocations::home);
+            autoProg += arm.setSetPoint(false, armLocations::home);
             break;
           case 4:
-            auto_scoreAndLeave_prog += arm.gotoSetPoint();
+            autoProg += arm.gotoSetPoint();
             break;
           case 5:
-            auto_scoreAndLeave_prog += drivetrain.setSetPoint(false, 0); // undefined
+            autoProg += drivetrain.setSetPoint(false, 0); // undefined
             break;
           case 6:
-            auto_scoreAndLeave_prog += drivetrain.gotoSetPoint();
+            autoProg += drivetrain.gotoSetPoint();
             break;
         } break;
       case 5:
-        switch (auto_scoreAndLevel_prog) {
+        switch (autoProg) {
           case 1:
-            auto_scoreAndLevel_prog += arm.setSetPoint(false, armLocations::cone::middle);
+            autoProg += arm.setSetPoint(false, armLocations::cone::middle);
             break;
           case 2:
-            auto_scoreAndLevel_prog += arm.gotoSetPoint();
+            autoProg += arm.gotoSetPoint(true, false);
             break;
           case 3:
-            auto_scoreAndLevel_prog += arm.setSetPoint(false, armLocations::home);
+            autoProg += arm.setSetPoint(false, armLocations::home);
             break;
           case 4:
-            auto_scoreAndLevel_prog += arm.gotoSetPoint();
+            autoProg += arm.gotoSetPoint();
             break;
           case 5:
-            auto_scoreAndLevel_prog += drivetrain.gotoRamp(gyro.GetXComplementaryAngle().value(), 1);
+            autoProg += drivetrain.gotoRamp(gyro.GetXComplementaryAngle().value(), 1);
             break;
           case 6:
-            auto_scoreAndLevel_prog += drivetrain.level(gyro.GetXComplementaryAngle().value());
+            autoProg += drivetrain.level(gyro.GetXComplementaryAngle().value());
             break;
         } break;
+        case 6:
+        
+        switch (autoProg) {
+          case 1:
+            autoProg += arm.setSetPoint(false, armLocations::cone::middle);
+            break;
+          case 2:
+            autoProg += arm.gotoSetPoint(true, false);
+            break;
+          case 3:
+            autoProg += arm.setSetPoint(false, armLocations::home);
+            break;
+          case 4:
+            autoProg += arm.gotoSetPoint();
+            break;
+          case 5:
+            autoProg += drivetrain.gotoRamp(gyro.GetXComplementaryAngle().value(), 1);
+            break;
+          case 6:
+            autoProg += drivetrain.level(gyro.GetXComplementaryAngle().value());
+            break;
+          case 7:
+            autoProg += drivetrain.setSetPoint(true, 0); // needs to be defined
+            break;
+          case 8:
+            autoProg += drivetrain.gotoSetPoint();
+            break;
+        };
   }
 }
 

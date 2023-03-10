@@ -70,6 +70,9 @@ class Arm {
     inline void setArmOffset() {
         armPosOffset = lift[0].GetSelectedSensorPosition();
     };
+    inline double getPIDOutput() {
+        return pid.Calculate(getMotorPos());
+    }
 
     void move() {
         //manual control
@@ -82,7 +85,7 @@ class Arm {
 
         }
 
-        else liftMs.Set(pid.Calculate(lift[0].GetSelectedSensorPosition()));
+        else liftMs.Set(getPIDOutput());
     }
     int setClaw_delay = 10;
     /**
@@ -110,15 +113,18 @@ class Arm {
     int timeSinceArival = 0;
     /**
      * function to go a predetermined location
+     * @param doRelease whether or not to open/close claw if setpoint reached
+     * @param release whether to open or close the claw
      * @return 1 if destination has been reached, 0 otherwise
     */
-    int gotoSetPoint() {
+    int gotoSetPoint(bool doClawToggle = false, bool clawState = false) {
         liftMs.Set(pid.Calculate(getMotorPos()));
 
         if (pid.AtSetpoint()) {
             timeSinceArival++;
             if (timeSinceArival > 8) {
                 timeSinceArival = 0;
+                if (doClawToggle) setClaw(clawState);
                 return 1;
             }
         }

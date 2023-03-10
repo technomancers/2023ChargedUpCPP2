@@ -82,9 +82,11 @@ class DriveTrain {
      * @return the output of the PID loop based on the right front motor position
     */
     inline double getPIDOutput() {
-        return pid.Calculate(right[0].GetSelectedSensorPosition());
+        return pid.Calculate(getMotorPos());
     }
-
+    inline int getMotorPos() {
+        return right[0].GetSelectedSensorPosition() - offset;
+    }
     /**
      * makes the robot drive
      * @param vel the speed multiplier
@@ -172,12 +174,13 @@ class DriveTrain {
      * @return 1
     */
     int setSetPoint(bool isIncrement, int pos) {
-        pid.SetSetpoint( isIncrement? right[0].GetSelectedSensorPosition() + pos : pos);
+        pid.SetSetpoint( isIncrement? getMotorPos() + pos : pos);
         return 1;
     }
     int setOffset() {
         offset = right[0].GetSelectedSensorPosition();
         return 1;
+    
     }
 
     int timeSinceArival = 0;
